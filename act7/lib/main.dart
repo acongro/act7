@@ -7,46 +7,52 @@ void main() {
   );
 }
 
-// ===== State (Provider) =====
 class MoodModel with ChangeNotifier {
   String _currentMoodPath = 'assets/moods/happy.png';
+  Color _backgroundColor = Colors.yellow.shade100;
+
   String get currentMoodPath => _currentMoodPath;
+  Color get backgroundColor => _backgroundColor;
 
   void setHappy() {
     _currentMoodPath = 'assets/moods/happy.png';
+    _backgroundColor = Colors.yellow.shade100;
     notifyListeners();
   }
 
   void setSad() {
     _currentMoodPath = 'assets/moods/sad.png';
+    _backgroundColor = Colors.lightBlue.shade100;
     notifyListeners();
   }
 
   void setExcited() {
     _currentMoodPath = 'assets/moods/excited.png';
+    _backgroundColor = Colors.orange.shade100;
     notifyListeners();
   }
 }
 
-// ===== App =====
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Mood Toggle Challenge',
-      theme: ThemeData(primarySwatch: Colors.blue), // safe across 3.x
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: const HomePage(),
     );
   }
 }
 
-// ===== UI =====
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
   @override
   Widget build(BuildContext context) {
+    final bg = context.watch<MoodModel>().backgroundColor;
+
     return Scaffold(
+      backgroundColor: bg,
       appBar: AppBar(title: const Text('Mood Toggle Challenge')),
       body: Center(
         child: Column(
@@ -92,15 +98,18 @@ class MoodButtons extends StatelessWidget {
       alignment: WrapAlignment.center,
       children: [
         ElevatedButton(
-          onPressed: () => context.read<MoodModel>().setHappy(),
+          onPressed: () =>
+              Provider.of<MoodModel>(context, listen: false).setHappy(),
           child: const Text('Happy 😊'),
         ),
         ElevatedButton(
-          onPressed: () => context.read<MoodModel>().setSad(),
+          onPressed: () =>
+              Provider.of<MoodModel>(context, listen: false).setSad(),
           child: const Text('Sad 😢'),
         ),
         ElevatedButton(
-          onPressed: () => context.read<MoodModel>().setExcited(),
+          onPressed: () =>
+              Provider.of<MoodModel>(context, listen: false).setExcited(),
           child: const Text('Excited 🎉'),
         ),
       ],
