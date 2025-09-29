@@ -11,24 +11,34 @@ class MoodModel with ChangeNotifier {
   String _currentMoodPath = 'assets/moods/happy.png';
   Color _backgroundColor = Colors.yellow.shade100;
 
+  final Map<String, int> _counts = {'Happy': 0, 'Sad': 0, 'Excited': 0};
+
   String get currentMoodPath => _currentMoodPath;
   Color get backgroundColor => _backgroundColor;
+  Map<String, int> get counts => Map.unmodifiable(_counts);
+
+  void _bump(String key) {
+    _counts[key] = (_counts[key] ?? 0) + 1;
+  }
 
   void setHappy() {
     _currentMoodPath = 'assets/moods/happy.png';
     _backgroundColor = Colors.yellow.shade100;
+    _bump('Happy');
     notifyListeners();
   }
 
   void setSad() {
     _currentMoodPath = 'assets/moods/sad.png';
     _backgroundColor = Colors.lightBlue.shade100;
+    _bump('Sad');
     notifyListeners();
   }
 
   void setExcited() {
     _currentMoodPath = 'assets/moods/excited.png';
     _backgroundColor = Colors.orange.shade100;
+    _bump('Excited');
     notifyListeners();
   }
 }
@@ -55,15 +65,20 @@ class HomePage extends StatelessWidget {
       backgroundColor: bg,
       appBar: AppBar(title: const Text('Mood Toggle Challenge')),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text('How are you feeling?', style: TextStyle(fontSize: 24)),
-            SizedBox(height: 30),
-            MoodDisplay(),
-            SizedBox(height: 50),
-            MoodButtons(),
-          ],
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Text('How are you feeling?', style: TextStyle(fontSize: 24)),
+              SizedBox(height: 24),
+              MoodDisplay(),
+              SizedBox(height: 36),
+              MoodButtons(),
+              SizedBox(height: 24),
+              MoodCounter(),
+            ],
+          ),
         ),
       ),
     );
@@ -111,6 +126,58 @@ class MoodButtons extends StatelessWidget {
           onPressed: () =>
               Provider.of<MoodModel>(context, listen: false).setExcited(),
           child: const Text('Excited 🎉'),
+        ),
+      ],
+    );
+  }
+}
+
+class MoodCounter extends StatelessWidget {
+  const MoodCounter({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<MoodModel>(
+      builder: (_, model, __) {
+        final counts = model.counts;
+        return Card(
+          elevation: 2,
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _CountPill(label: 'Happy', value: counts['Happy'] ?? 0),
+                _CountPill(label: 'Sad', value: counts['Sad'] ?? 0),
+                _CountPill(label: 'Excited', value: counts['Excited'] ?? 0),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _CountPill extends StatelessWidget {
+  final String label;
+  final int value;
+  const _CountPill({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+        const SizedBox(height: 6),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(999),
+            color: Colors.black.withOpacity(0.06),
+          ),
+          child: Text(value.toString(), style: const TextStyle(fontSize: 16)),
         ),
       ],
     );
