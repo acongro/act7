@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -41,6 +42,19 @@ class MoodModel with ChangeNotifier {
     _bump('Excited');
     notifyListeners();
   }
+
+  void setRandom() {
+    switch (Random().nextInt(3)) {
+      case 0:
+        setHappy();
+        break;
+      case 1:
+        setSad();
+        break;
+      default:
+        setExcited();
+    }
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -60,7 +74,6 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bg = context.watch<MoodModel>().backgroundColor;
-
     return Scaffold(
       backgroundColor: bg,
       appBar: AppBar(title: const Text('Mood Toggle Challenge')),
@@ -75,6 +88,8 @@ class HomePage extends StatelessWidget {
               MoodDisplay(),
               SizedBox(height: 36),
               MoodButtons(),
+              SizedBox(height: 12),
+              RandomMoodButton(),
               SizedBox(height: 24),
               MoodCounter(),
             ],
@@ -132,9 +147,27 @@ class MoodButtons extends StatelessWidget {
   }
 }
 
+class RandomMoodButton extends StatelessWidget {
+  const RandomMoodButton({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: () =>
+          Provider.of<MoodModel>(context, listen: false).setRandom(),
+      icon: const Icon(Icons.casino),
+      label: const Text('Random'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.purple,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+        textStyle: const TextStyle(fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+}
+
 class MoodCounter extends StatelessWidget {
   const MoodCounter({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Consumer<MoodModel>(
@@ -164,7 +197,6 @@ class _CountPill extends StatelessWidget {
   final String label;
   final int value;
   const _CountPill({required this.label, required this.value});
-
   @override
   Widget build(BuildContext context) {
     return Column(
